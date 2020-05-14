@@ -116,27 +116,26 @@
             style = style || {};
             var $body = $('body');
             if(style.v) $body = $('#' + style.v);
-            if($body.children('.xc-loading').length == 0){
-                var fillColor = style.fillColor || '#4FC2BF';
-                var str = '';
-                str += '<div class="xc-loading">';
-                str += '	<div class="xc-con">';
-                str += '		<svg version="1.1"xmlns="http://www.w3.org/2000/svg">';
-                str += '		    <circle cx="47" cy="10" r="10" stroke="none" fill="'+ fillColor +'" opacity="1"/>';
-                str += '		    <circle cx="23" cy="16" r="9" stroke="none" fill="'+ fillColor +'" opacity="0.9"/>';
-                str += '		    <circle cx="10" cy="33" r="8" stroke="none" fill="'+ fillColor +'" opacity="0.8"/>';
-                str += '		    <circle cx="10" cy="51" r="7" stroke="none" fill="'+ fillColor +'" opacity="0.7"/>';
-                str += '		    <circle cx="19" cy="66" r="6" stroke="none" fill="'+ fillColor +'" opacity="0.6"/>';
-                str += '		    <circle cx="32" cy="74" r="5" stroke="none" fill="'+ fillColor +'" opacity="0.5"/>';
-                str += '		    <circle cx="46" cy="75" r="4" stroke="none" fill="'+ fillColor +'" opacity="0.4"/>';
-                str += '		    <circle cx="57" cy="72" r="3" stroke="none" fill="'+ fillColor +'" opacity="0.3"/>';
-                str += '		    <circle cx="67" cy="65" r="2" stroke="none" fill="'+ fillColor +'" opacity="0.2"/>';
-                str += '		    <circle cx="71" cy="57" r="1" stroke="none" fill="'+ fillColor +'" opacity="0.1"/>';
-                str += '		</svg">';
-                str += '	</div>';
-                str += '</div>';
-                $body.append(str);
-            }
+            $body.children('.xc-loading').remove();
+            var fillColor = style.fillColor || '#4FC2BF';
+            var str = '';
+            str += '<div class="xc-loading">';
+            str += '	<div class="xc-con">';
+            str += '		<svg version="1.1"xmlns="http://www.w3.org/2000/svg">';
+            str += '		    <circle cx="47" cy="10" r="10" stroke="none" fill="'+ fillColor +'" opacity="1"/>';
+            str += '		    <circle cx="23" cy="16" r="9" stroke="none" fill="'+ fillColor +'" opacity="0.9"/>';
+            str += '		    <circle cx="10" cy="33" r="8" stroke="none" fill="'+ fillColor +'" opacity="0.8"/>';
+            str += '		    <circle cx="10" cy="51" r="7" stroke="none" fill="'+ fillColor +'" opacity="0.7"/>';
+            str += '		    <circle cx="19" cy="66" r="6" stroke="none" fill="'+ fillColor +'" opacity="0.6"/>';
+            str += '		    <circle cx="32" cy="74" r="5" stroke="none" fill="'+ fillColor +'" opacity="0.5"/>';
+            str += '		    <circle cx="46" cy="75" r="4" stroke="none" fill="'+ fillColor +'" opacity="0.4"/>';
+            str += '		    <circle cx="57" cy="72" r="3" stroke="none" fill="'+ fillColor +'" opacity="0.3"/>';
+            str += '		    <circle cx="67" cy="65" r="2" stroke="none" fill="'+ fillColor +'" opacity="0.2"/>';
+            str += '		    <circle cx="71" cy="57" r="1" stroke="none" fill="'+ fillColor +'" opacity="0.1"/>';
+            str += '		</svg">';
+            str += '	</div>';
+            str += '</div>';
+            $body.append(str);
             var $loading = $body.children('.xc-loading');
             if(o == 'open'){
                 $loading.show();
