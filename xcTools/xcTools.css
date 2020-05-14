@@ -1,4 +1,5 @@
 *, :after, :before{margin: 0;padding: 0;box-sizing: border-box;}
+html{height: 100%;}
 table{border-collapse: collapse;border-spacing: 0;}
 .clearfix{display: block;}
 .clearfix:after{content: ".";display: block;height: 0;clear: both;visibility: hidden;}
@@ -25,3 +26,6 @@ table{border-collapse: collapse;border-spacing: 0;}
 .xc-loading .xc-con{width: 120px;height: 120px;position: absolute;top: 50%;left: 50%;margin: -60px 0 0 -60px;border-radius: 10px;background: rgba(0, 0, 0, 0.5);}
 .xc-loading .xc-con svg{display: block;width: 80px;height: 80px;margin: 20px 0 0 20px;animation: xcLoading 1s infinite linear;transform: rotate(0deg) scale(0.5);}
 @keyframes xcLoading{0%{transform: rotate(0deg) scale(0.5);}100%{transform: rotate(360deg) scale(0.5);}}
+.xc-loading.xc-loading-po{position: absolute;}
+.xc-loading.xc-loading-out{pointer-events: none;}
+.xc-loading.xc-loading-bg-color{background: rgba(0, 0, 0, 0.5);}

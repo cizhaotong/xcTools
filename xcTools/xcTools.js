@@ -105,11 +105,19 @@
         },
         /**
          * @action loading 加载中特效
-         * @param o: 类型,open打开,close关闭
+         * @param o: 操作,open打开,close关闭
+         * @param style: 样式,可选
+         * @param style.v: 指定父级id,可选
+         * @param style.out: 1去除遮罩层阻挡效果, 2点击遮罩层关闭,可选
+         * @param style.color: 遮罩层是否显示颜色, 默认false透明,可选true
+         * @param style.fillColor: 等待动画图标颜色
          */
-        loading: function(o){
-            if($('.xc-loading').length == 0){
-                var fillColor = '#4FC2BF';
+        loading: function(o, style){
+            style = style || {};
+            var $body = $('body');
+            if(style.v) $body = $('#' + style.v);
+            if($body.children('.xc-loading').length == 0){
+                var fillColor = style.fillColor || '#4FC2BF';
                 var str = '';
                 str += '<div class="xc-loading">';
                 str += '	<div class="xc-con">';
@@ -127,18 +135,42 @@
                 str += '		</svg">';
                 str += '	</div>';
                 str += '</div>';
-                $('body').append(str);
+                $body.append(str);
             }
+            var $loading = $body.children('.xc-loading');
             if(o == 'open'){
-                $('.xc-loading').show();
+                $loading.show();
             }else if(o == 'close'){
-                $('.xc-loading').hide();
+                $loading.hide();
             }else{
-                if($('.xc-loading').is(':hidden')){
-                    $('.xc-loading').show();
+                if($loading.is(':hidden')){
+                    $loading.show();
                 }else{
-                    $('.xc-loading').hide();
+                    $loading.hide();
                 }
+            }
+            if(style.v){
+                var parentPo = $body.css('position');
+                if(parentPo != 'absolute' && parentPo != 'fixed'){
+                    $body.css('position', 'relative');
+                }
+                $loading.addClass('xc-loading-po');
+            }else {
+                $loading.removeClass('xc-loading-po');
+            }
+            if(style.out == '1'){
+                $loading.addClass('xc-loading-out');
+            }else if(style.out == '2'){
+                $loading.removeClass('xc-loading-out').unbind().click(function(){
+                    $(this).hide();
+                });
+            }else{
+                $loading.removeClass('xc-loading-out');
+            }
+            if(style.color){
+                $loading.addClass('xc-loading-bg-color');
+            }else {
+                $loading.removeClass('xc-loading-bg-color');
             }
         },
         ajaxCountLink: 0,
@@ -233,6 +265,98 @@
                 var cookieList = document.cookie.split('; ');
                 for(var i = 0 ; i < cookieList.length ; i ++){
                     document.cookie= cookieList[i].split('=:')[0] + '=:'+ cookieList[i].split('=:')[1] +';expires='+ exp.toUTCString() + ';path=/;';
+                }
+            }
+        },
+        /**
+         * @action fitScreen 适应屏幕
+         * @param v: 绑定元素id
+         * @param screen.width: 屏幕宽度
+         * @param screen.height: 屏幕高度
+         * @param layout: 布局
+         */
+        fitScreen: function(v, screen, layout){
+            var _this = this;
+            var windowHeight = $(window).height();
+            $('body').css('min-height', windowHeight);
+            _this.countScreen(v, screen, layout);
+            $(window).resize(function(){
+                if(windowHeight < $(this).height()) {
+                    windowHeight = $(this).height();
+                    $('body').css('min-height', windowHeight);
+                    _this.countScreen(v, screen, layout);
+                }
+            });
+        },
+        /**
+         * @action fitScreen 计算屏幕比例
+         * @param v: 绑定元素id
+         * @param screen.width: 屏幕宽度
+         * @param screen.height: 屏幕高度
+         * @param screen.real: 可选,是否真实尺寸,默认false适应屏幕
+         * @param layout: 模块布局
+         * @param layout.id: 模块id
+         * @param layout.po: 模块位置[x, y];
+         * @param layout.size: 模块大小[width, height];
+         */
+        countScreen: function (v, screen, layout) {
+            if(v && screen){
+                var windowWidth = $(window).width();
+                var windowHeight = $(window).height();
+                var screenWidth = parseInt(screen.width) || windowWidth;
+                var screenHeight = parseInt(screen.height) || windowHeight;
+                var realWidth = windowHeight / screenHeight * screenWidth;
+                var realHeight = windowHeight;
+                if(screen.real) {
+                    realWidth = screenWidth;
+                    realHeight = screenHeight;
+                }
+                $('#' + v).css({
+                    display: 'block',
+                    margin: '0 auto',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    width: realWidth,
+                    height: realHeight
+                }).parent().css({
+                    overflow: 'auto'
+                });
+                if(layout && layout.length){
+                    for(var i in layout){
+                        var layoutId = layout[i].id;
+                        var $layoutItem = $('#' + layoutId);
+                        if(!$layoutItem.length) continue;
+                        $layoutItem.css({
+                            position: 'absolute',
+                            display: 'block'
+                        });
+                        var layoutPo = layout[i].po;
+                        if(layoutPo && layoutPo.length) {
+                            var poLeft = windowHeight / screenHeight * layoutPo[0];
+                            var poRight = windowHeight / screenHeight * layoutPo[1];
+                            if(screen.real) {
+                                poLeft = layoutPo[0];
+                                poRight = layoutPo[1];
+                            }
+                            $layoutItem.css({
+                                left: poLeft + 'px',
+                                top: poRight + 'px'
+                            });
+                        }
+                        var layoutSize = layout[i].size;
+                        if(layoutSize && layoutSize.length) {
+                            var sizeWidth = windowHeight / screenHeight * layoutSize[0];
+                            var sizeHeight = windowHeight / screenHeight * layoutSize[1];
+                            if(screen.real) {
+                                sizeWidth = layoutSize[0];
+                                sizeHeight = layoutSize[1];
+                            }
+                            $layoutItem.css({
+                                width: sizeWidth + 'px',
+                                height: sizeHeight + 'px'
+                            });
+                        }
+                    }
                 }
             }
         }

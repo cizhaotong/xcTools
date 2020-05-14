@@ -6,8 +6,33 @@
     <script type="text/javascript" src="./jQuery/jquery.min.js"></script>
     <link type="text/css" rel="stylesheet" media="all" href="./xcTools/xcTools.css" />
     <script type="text/javascript" src="./xcTools/xcTools.js"></script>
+    <script>
+       $(function(){
+           $xc.fitScreen('kk', {
+               width: 2000,
+               height: 600,
+               real: true
+           },[{
+               id: 'aa',
+               po: [10, 10],
+               size: [500, 300]
+           },{
+               id: 'bb',
+               po: [520, 220],
+               size: [300, 400]
+           }]);
+           $('#aa a').click(function(){
+               alert(234);
+           });
+       });
+    </script>
 </head>
 <body>
-	
+	<div id="kk" style="background: #ddd;">
+        <div id="aa" style="background: red;"><a>33</a></div>
+        <div id="bb" style="background: blue;"></div>
+        <div id="cc" style="background: green;"></div>
+        <div id="dd" style="background: orange;"></div>
+    </div>
 </body>
 </html>
