@@ -29,3 +29,8 @@ table{border-collapse: collapse;border-spacing: 0;}
 .xc-loading.xc-loading-po{position: absolute;}
 .xc-loading.xc-loading-out{pointer-events: none;}
 .xc-loading.xc-loading-bg-color{background: rgba(0, 0, 0, 0.5);}
+
+.xc-map{width: 100%;height: 100%;position: relative;z-index: 6;}
+.xc-map .xc-map-before, .xc-map .xc-map-after{display: block;width: 100%;height: 100%;position: absolute;top: 0;left: 0;pointer-events: none;}
+.xc-map .xc-map-before{z-index: -1;}
+.xc-map .xc-map-after{z-index: 1;}
