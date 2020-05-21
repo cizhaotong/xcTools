@@ -208,7 +208,7 @@
             var _this = this;
             _this.ajaxList.push({
                 url: url,
-                params: params,
+                params: JSON.stringify(params),
                 success: success,
                 error: error,
                 async: async,
@@ -257,7 +257,6 @@
             var _in = _this.ajaxList[0];
             if(_in.async === false) _this.ajaxStop = true;
             _this.ajaxList.splice(0, 1);
-            if(_in.type == 'POST') _in.params = JSON.stringify(_in.params);
             $.ajax({
                 url: _in.url,
                 type: _in.type,
@@ -345,92 +344,71 @@
         /**
          * @action fitScreen 适应屏幕
          * @param v: 绑定元素id
-         * @param screen.width: 屏幕宽度
-         * @param screen.height: 屏幕高度
-         * @param layout: 布局
+         * @param screen: 原尺寸, 必须
+         * @param screen.width: 原尺寸宽度, 必须
+         * @param screen.height: 原尺寸高度, 必须
+         * @param screen.scale: 比例尺, 默认'real'原尺寸, 可选'equal'等比缩放, 'stretch'铺满屏幕
          */
-        fitScreen: function(v, screen, layout){
+        fitScreen: function(v, screen){
             var _this = this;
             var windowHeight = $(window).height();
             $('body').css('min-height', windowHeight);
-            _this.countScreen(v, screen, layout);
+            _this.countScreen(v, screen);
             $(window).resize(function(){
                 if(windowHeight < $(this).height()) {
                     windowHeight = $(this).height();
                     $('body').css('min-height', windowHeight);
-                    _this.countScreen(v, screen, layout);
+                    _this.countScreen(v, screen);
                 }
             });
         },
-        /**
-         * @action fitScreen 计算屏幕比例
-         * @param v: 绑定元素id
-         * @param screen.width: 屏幕宽度
-         * @param screen.height: 屏幕高度
-         * @param screen.real: 可选,是否真实尺寸,默认false适应屏幕
-         * @param layout: 模块布局
-         * @param layout.id: 模块id
-         * @param layout.po: 模块位置[x, y];
-         * @param layout.size: 模块大小[width, height];
-         */
-        countScreen: function (v, screen, layout) {
+        countScreen: function (v, screen) {
             if(v && screen){
                 var windowWidth = $(window).width();
                 var windowHeight = $(window).height();
-                var screenWidth = parseInt(screen.width) || windowWidth;
-                var screenHeight = parseInt(screen.height) || windowHeight;
-                var realWidth = windowHeight / screenHeight * screenWidth;
-                var realHeight = windowHeight;
-                if(screen.real) {
-                    realWidth = screenWidth;
-                    realHeight = screenHeight;
-                }
                 $('#' + v).css({
                     display: 'block',
-                    margin: '0 auto',
                     overflow: 'hidden',
                     position: 'relative',
-                    width: realWidth,
-                    height: realHeight
+                    width: screen.width,
+                    height: screen.height
                 }).parent().css({
                     overflow: 'auto'
                 });
-                if(layout && layout.length){
-                    for(var i in layout){
-                        var layoutId = layout[i].id;
-                        var $layoutItem = $('#' + layoutId);
-                        if(!$layoutItem.length) continue;
-                        $layoutItem.css({
-                            position: 'absolute',
-                            display: 'block'
-                        });
-                        var layoutPo = layout[i].po;
-                        if(layoutPo && layoutPo.length) {
-                            var poLeft = windowHeight / screenHeight * layoutPo[0];
-                            var poRight = windowHeight / screenHeight * layoutPo[1];
-                            if(screen.real) {
-                                poLeft = layoutPo[0];
-                                poRight = layoutPo[1];
-                            }
-                            $layoutItem.css({
-                                left: poLeft + 'px',
-                                top: poRight + 'px'
-                            });
-                        }
-                        var layoutSize = layout[i].size;
-                        if(layoutSize && layoutSize.length) {
-                            var sizeWidth = windowHeight / screenHeight * layoutSize[0];
-                            var sizeHeight = windowHeight / screenHeight * layoutSize[1];
-                            if(screen.real) {
-                                sizeWidth = layoutSize[0];
-                                sizeHeight = layoutSize[1];
-                            }
-                            $layoutItem.css({
-                                width: sizeWidth + 'px',
-                                height: sizeHeight + 'px'
-                            });
-                        }
+                var finalWidth = screen.width;
+                var finalHeight = screen.height;
+                if(screen.scale == 'equal'){
+                    if(windowWidth / windowHeight > screen.width / screen.height){
+                        finalHeight = windowHeight;
+                        finalWidth = windowHeight / screen.height * screen.width;
+                    }else{
+                        finalWidth = windowWidth;
+                        finalHeight = windowWidth / screen.width * screen.height;
+
                     }
+                }else if(screen.scale == 'stretch'){
+                    finalWidth = windowWidth;
+                    finalHeight = windowHeight;
+                }
+                if(screen.scale == 'equal' || screen.scale == 'stretch') {
+                    var scaleX = finalWidth / screen.width;
+                    var scaleY = finalHeight / screen.height;
+                    var translateX = (windowWidth -  screen.width) / 2 + 'px';
+                    var translateY = (windowHeight - screen.height) / 2 + 'px';
+
+                    var parentPo = $('#' + v).parent().css('position');
+                    if(parentPo != 'absolute' && parentPo != 'fixed'){
+                        $('#' + v).parent().css({
+                            position: 'relative',
+                            overflow: 'hidden'
+                        });
+                    }
+                    $('#' + v).css({
+                        position: 'absolute',
+                        top: translateY,
+                        left: translateX,
+                        transform: 'scale('+ scaleX +', '+ scaleY +')',
+                    });
                 }
             }
         }
