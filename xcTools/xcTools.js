@@ -193,40 +193,96 @@
                 $loading.find('circle').attr('fill', style.fillColor);
             }
         },
-        ajaxReqList: [],
-        ajaxPost: function(url, params, successFunc, errorFunc, async, header){
+        ajaxList: [],
+        ajaxStop: false,
+        /**
+         * @action ajaxPost ajax POST请求
+         * @param url: 请求地址, 必须
+         * @param params: 请求参数, 必须
+         * @param success: 请求成功返回方法, 可选
+         * @param error: 请求失败返回方法, 可选
+         * @param async: 请求方式, 默认true异步, 可选同步
+         * @param header: 请求头添加参数, 可选
+         */
+        ajaxPost: function(url, params, success, error, async, header){
             var _this = this;
-            $.ajax({
+            _this.ajaxList.push({
                 url: url,
-                type: 'POST',
+                params: params,
+                success: success,
+                error: error,
+                async: async,
+                header: header,
+                type: 'POST'
+            });
+            _this.ajaxAction();
+        },
+        /**
+         * @action ajaxPostMethod ajax POST请求后台
+         */
+        ajaxGet: function(url, params, success, error, async, header){
+            var _this = this;
+            _this.ajaxList.push({
+                url: url,
+                params: params,
+                success: success,
+                error: error,
+                async: async,
+                header: header,
+                type: 'GET'
+            });
+            _this.ajaxAction();
+        },
+        ajaxPlay: function(status, async){
+            var _this = this;
+            _this.ajaxStop = false;
+            if(async !== false) return;
+            if(status != 'success') {
+                _this.ajaxList = [];
+            };
+            var len = _this.ajaxList.length;
+            for(var i = 0 ; i < len ; i ++) {
+                var _in = _this.ajaxList[0];
+                _this.ajaxAction();
+                if(_in.async === false) return;
+            }
+
+        },
+        ajaxAction: function(){
+            var _this = this;
+            if(!_this.ajaxList.length || _this.ajaxStop) return;
+            var _in = _this.ajaxList[0];
+            if(_in.async === false) _this.ajaxStop = true;
+            _this.ajaxList.splice(0, 1);
+            $.ajax({
+                url: _in.url,
+                type: _in.type,
                 timeout: 60000,
                 dataType: 'json',
-                data: JSON.stringify(params),
-                async: async != false,
+                data: JSON.stringify(_in.params),
+                async: true,
                 contentType: 'application/json',
-                beforeSend: function (request) {
-                    if(header){
-                        for(var key in header){
-                            request.setRequestHeader('key', header[key]);
+                beforeSend: function (XHR) {
+                    if(_in.header){
+                        for(var key in _in.header){
+                            XHR.setRequestHeader('key', _in.header[key]);
                         }
                     }
                 },
                 success: function(obj){
-                    if(successFunc){
-                        successFunc(obj);
+                    if(_in.success){
+                        _in.success(obj);
                     }
                 },
                 error: function(XMLHttpRequest, textstatus){
-                    console.log(url + '接口异常请求:' + JSON.stringify(params));
-                    console.log(url + '接口异常返回:' + XMLHttpRequest.statusText);
-                    if(errorFunc){
-                        errorFunc(XMLHttpRequest, textstatus);
+                    if(_in.error){
+                        _in.error(XMLHttpRequest, textstatus);
                     }
+                },
+                complete: function(XHR, TS){
+                    _this.ajaxPlay(TS, _in.async);
                 }
             });
-        },
-        ajaxGet: function(){
-
         },
         store: {
             set : function(key, value){
