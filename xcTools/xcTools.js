@@ -342,27 +342,27 @@
             }
         },
         /**
-         * @action fitScreen 适应屏幕
+         * @action fitBigScreen 大屏自适应
          * @param v: 绑定元素id
          * @param screen: 原尺寸, 必须
          * @param screen.width: 原尺寸宽度, 必须
          * @param screen.height: 原尺寸高度, 必须
          * @param screen.scale: 比例尺, 默认'real'原尺寸, 可选'equal'等比缩放, 'stretch'铺满屏幕
          */
-        fitScreen: function(v, screen){
+        fitBigScreen: function(v, screen){
             var _this = this;
             var windowHeight = $(window).height();
             $('body').css('min-height', windowHeight);
-            _this.countScreen(v, screen);
+            _this.countBigScreen(v, screen);
             $(window).resize(function(){
                 if(windowHeight < $(this).height()) {
                     windowHeight = $(this).height();
                     $('body').css('min-height', windowHeight);
-                    _this.countScreen(v, screen);
+                    _this.countBigScreen(v, screen);
                 }
             });
         },
-        countScreen: function (v, screen) {
+        countBigScreen: function (v, screen) {
             if(v && screen){
                 var windowWidth = $(window).width();
                 var windowHeight = $(window).height();
