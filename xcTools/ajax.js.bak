@@ -193,7 +193,8 @@
                 $loading.find('circle').attr('fill', style.fillColor);
             }
         },
-        ajaxCount: 0,
+        ajaxList: [],
+        ajaxStop: false,
         /**
          * @action ajaxPost ajax POST请求
          * @param url: 请求地址, 必须
@@ -204,54 +205,87 @@
          * @param header: 请求头添加参数, 可选
          */
         ajaxPost: function(url, params, success, error, async, header){
-            this.ajaxAction(url, JSON.stringify(params), success, error, async, header, 'POST');
+            var _this = this;
+            _this.ajaxList.push({
+                url: url,
+                params: JSON.stringify(params),
+                success: success,
+                error: error,
+                async: async,
+                header: header,
+                type: 'POST'
+            });
+            _this.ajaxAction();
         },
         /**
          * @action ajaxPostMethod ajax POST请求后台
          */
         ajaxGet: function(url, params, success, error, async, header){
-            this.ajaxAction(url, params, success, error, async, header, 'GET');
-        },
-        ajaxAction: function(url, params, success, error, async, header, type){
             var _this = this;
-            _this.ajaxLoading('open');
-            $.ajax({
+            _this.ajaxList.push({
                 url: url,
-                type: type,
+                params: params,
+                success: success,
+                error: error,
+                async: async,
+                header: header,
+                type: 'GET'
+            });
+            _this.ajaxAction();
+        },
+        ajaxPlay: function(status, async){
+            var _this = this;
+            _this.ajaxStop = false;
+            if(!_this.ajaxList.length) _this.loading('close');
+            if(async === false) {
+                if(status != 'success') {
+                    _this.ajaxList = [];
+                    _this.loading('close');
+                };
+                var len = _this.ajaxList.length;
+                for(var i = 0 ; i < len ; i ++) {
+                    var _in = _this.ajaxList[0];
+                    _this.ajaxAction();
+                    if(_in.async === false) return;
+                }
+            };
+        },
+        ajaxAction: function(){
+            var _this = this;
+            _this.loading('open');
+            if(_this.ajaxStop) return;
+            var _in = _this.ajaxList[0];
+            if(_in.async === false) _this.ajaxStop = true;
+            _this.ajaxList.splice(0, 1);
+            $.ajax({
+                url: _in.url,
+                type: _in.type,
                 timeout: 60000,
                 dataType: 'json',
-                data: params,
-                async: async !== false,
+                data: _in.params,
+                async: true,
                 contentType: 'application/json',
                 beforeSend: function (XHR) {
-                    if(header){
-                        for(var key in header){
-                            XHR.setRequestHeader('key', header[key]);
+                    if(_in.header){
+                        for(var key in _in.header){
+                            XHR.setRequestHeader('key', _in.header[key]);
                         }
                     }
                 },
                 success: function(obj){
-                    _this.ajaxLoading('close');
-                    if(success) success(obj);
+                    if(_in.success){
+                        _in.success(obj);
+                    }
                 },
-                error: function(XHR, status){
-                    _this.ajaxLoading('close');
-                    if(error) error(XHR, status);
+                error: function(XMLHttpRequest, textstatus){
+                    if(_in.error){
+                        _in.error(XMLHttpRequest, textstatus);
+                    }
+                },
+                complete: function(XHR, TS){
+                    _this.ajaxPlay(TS, _in.async);
                 }
             });
-        },
-        ajaxLoading: function(o) {
-            var _this = this;
-            if(o == 'open'){
-                _this.ajaxCount ++;
-                $xc.loading('open');
-            }else if('close'){
-                _this.ajaxCount --;
-                if(_this.ajaxCount <= 0){
-                    _this.ajaxCount = 0;
-                    $xc.loading('close');
-                }
-            }
         },
         store: {
             set : function(key, value){
