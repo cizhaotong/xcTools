@@ -207,7 +207,13 @@
             this.ajaxAction(url, JSON.stringify(params), success, error, async, header, 'POST');
         },
         /**
-         * @action ajaxPostMethod ajax POST请求后台
+         * @action ajaxGet ajax GET请求
+         * @param url: 请求地址, 必须
+         * @param params: 请求参数, 必须
+         * @param success: 请求成功返回方法, 可选
+         * @param error: 请求失败返回方法, 可选
+         * @param async: 请求方式, 默认true异步, 可选同步
+         * @param header: 请求头添加参数, 可选
          */
         ajaxGet: function(url, params, success, error, async, header){
             this.ajaxAction(url, params, success, error, async, header, 'GET');
