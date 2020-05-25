@@ -1,4 +1,4 @@
-(function(window, $){
+(function(window, $, Highcharts){
     "use strict";
     var xc = {};
     /** 工具库 */
@@ -387,6 +387,7 @@
     };
     /** 图表库 */
     xc.charts = {
+        
 
     };
     /** 地图 */
@@ -483,4 +484,4 @@
     window.$xc = xc.tools;
     window.$xc.charts = xc.charts;
     window.$xc.maps = xc.maps;
-}(window, jQuery));
+}(window, jQuery, Highcharts));
