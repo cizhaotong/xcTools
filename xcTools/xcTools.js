@@ -1,4 +1,4 @@
-(function(window, $, Highcharts){
+(function(window){
     "use strict";
     var xc = {};
     /** 工具库 */
@@ -387,7 +387,6 @@
     };
     /** 图表库 */
     xc.charts = {
-        
 
     };
     /** 地图 */
@@ -484,4 +483,8 @@
     window.$xc = xc.tools;
     window.$xc.charts = xc.charts;
     window.$xc.maps = xc.maps;
-}(window, jQuery, Highcharts));
+    var baseUrl = $xc.getCurrentUrl();
+    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ baseUrl +'/xcTools.css" />');
+    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/jQuery/jquery.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/highchats/highcharts1.min.js"></script>');
+}(window));
