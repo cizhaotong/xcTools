@@ -8,17 +8,8 @@
          * @return  string 路径
          */
         getCurrentUrl: function(){
-            var stack;
-            try{
-                null.split();
-            }catch(e){
-                stack = e.stack;
-            }
-            var rExtractUri = /(?:http|https|file):\/\/.*?\/.+?.js/;
-            var absPath = rExtractUri.exec(stack);
-            absPath = absPath[0].split('/');
-            absPath.splice(absPath.length - 1, 1);
-            absPath = absPath.join('/');
+            var js = document.scripts;
+            var absPath = js[js.length - 1].src.substring(0, js[js.length - 1].src.lastIndexOf('/') + 1);
             return absPath;
         },
         /**
@@ -503,7 +494,6 @@
     window.$xc.charts = xc.charts;
     window.$xc.maps = xc.maps;
     var baseUrl = $xc.getCurrentUrl();
-    debugger;
     document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ baseUrl +'/xcTools.css" />');
     document.writeln('<script type="text/javascript" src="'+ baseUrl +'/jQuery/jquery.min.js"></script>');
     document.writeln('<script type="text/javascript" src="'+ baseUrl +'/highchats/highcharts.min.js"></script>');
