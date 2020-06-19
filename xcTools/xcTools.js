@@ -383,6 +383,25 @@
                     });
                 }
             }
+        },
+        /**
+         * @action scroll 滚动
+         * @param v: 绑定元素id
+         * @param style: 样式, 可选
+         * @param style.type: 滚动方向,默认up向上滚动,可选dowm向下滚动
+         * @param style.mode: 滚动方式,默认page一页,可选row一行,scroll缓慢滚动
+         */
+        scroll: function(v, style){
+            var _this = this;
+            var parentPo = $('#' + id).parent().css('position');
+            if(parentPo != 'absolute' && parentPo != 'fixed'){
+                $('#' + id).parent().css('position', 'relative');
+            }
+            var thisH = $('#' + id).outerHeight(true);
+            var parentH = $('#' + id).parent().height();
+            if(thisH > parentH){
+                $('#' + id).css('position', 'absolute');
+            }
         }
     };
     /** 图表库 */
@@ -484,7 +503,8 @@
     window.$xc.charts = xc.charts;
     window.$xc.maps = xc.maps;
     var baseUrl = $xc.getCurrentUrl();
+    debugger;
     document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ baseUrl +'/xcTools.css" />');
     document.writeln('<script type="text/javascript" src="'+ baseUrl +'/jQuery/jquery.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/highchats/highcharts1.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/highchats/highcharts.min.js"></script>');
 }(window));
