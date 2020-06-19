@@ -1,17 +1,13 @@
 (function(window){
     "use strict";
     var xc = {};
+    xc.absPath = document.scripts[document.scripts.length - 1].src.substring(0, document.scripts[document.scripts.length - 1].src.lastIndexOf('/') + 1);
+    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ xc.absPath +'/xcTools.css" />');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/jQuery/jquery.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/highchats/highcharts.min.js"></script>');
+
     /** 工具库 */
     xc.tools = {
-        /**
-         * @action getCurrentUrl 获取当前js路径
-         * @return  string 路径
-         */
-        getCurrentUrl: function(){
-            var js = document.scripts;
-            var absPath = js[js.length - 1].src.substring(0, js[js.length - 1].src.lastIndexOf('/') + 1);
-            return absPath;
-        },
         /**
          * @action getUrlParam 获取url参数
          * @param name 参数名称
@@ -459,9 +455,8 @@
             };
         },
         Licheng: function(name, style){
-            var getCurrentUrl = xc.tools.getCurrentUrl();
-            var bg = getCurrentUrl + '/map/' + name + '-bg.png';
-            var text = getCurrentUrl + '/map/' + name + '-text.png';
+            var bg = xc.absPath + '/map/' + name + '-bg.png';
+            var text = xc.absPath + '/map/' + name + '-text.png';
             var fill = style.fill || 'rgba(0,0,0,0)';
             var map = '';
             map += '<div class="xc-map">';
@@ -493,8 +488,4 @@
     window.$xc = xc.tools;
     window.$xc.charts = xc.charts;
     window.$xc.maps = xc.maps;
-    var baseUrl = $xc.getCurrentUrl();
-    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ baseUrl +'/xcTools.css" />');
-    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/jQuery/jquery.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ baseUrl +'/highchats/highcharts.min.js"></script>');
 }(window));
