@@ -2,9 +2,13 @@
     "use strict";
     var xc = {};
     xc.absPath = document.scripts[document.scripts.length - 1].src.substring(0, document.scripts[document.scripts.length - 1].src.lastIndexOf('/') + 1);
-    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ xc.absPath +'/xcTools.css" />');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/jQuery/jquery.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/highchats/highcharts.min.js"></script>');
+    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ xc.absPath +'xcTools.css" />');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'jQuery/jquery.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/highcharts.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/highcharts-more.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/circleChart.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'tianditu/tianditu.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'tianditu/heatmapOverlay.js"></script>');
 
     /** 工具库 */
     xc.tools = {
@@ -393,7 +397,1175 @@
     };
     /** 图表库 */
     xc.charts = {
+        /**
+         * 折线图
+         * @params v: 绑定元素id , 必须
+         * @params datas: 数据列表,例: [{name: '名称', data: [1, 2, 3, ...]}, ...] , 必须
+         * @params xLabels: x轴文字显示列表,例: ['文字1', '文字2', '文字3', ...] , 必须
+         * @params style: 样式控制
+         * @params style.colors: 面积背景颜色 , 例: ['#428EDA', '#87D568', ...] , 可选
+         * @params style.fontSize: x,y轴标签文字大小
+         * @params style.fontColor: x,y轴标签文字颜色
+         * @params style.legend: 图例控制
+         * @params style.legend.enabled: 图例开关,默认true,可选false
+         * @params style.legend.color: 字颜色
+         * @params style.legend.po: 图例位置,默认bottom,可选top, right, bottom, left
+         * @params style.legend.in: 图例是否在图表内部显示,默认false,可选true
+         * @params style.legend.inPo: 图例在图标内部显示位置,默认middle, 可选top, middle, bottom
+         * @params style.legend.inBgColor: 图例在图标内部显示背景颜色,默认#fff
+         * @params style.legend.inBorderWidth: 图例在图标内部显示边框宽度,默认1
+         * @params style.legend.inBorderColor: 图例在图标内部显示边框颜色,默认#999
+         * */
+        line: function(v, datas, xLabels, style){
+            datas = datas || [];
+            xLabels = xLabels || [];
+            style = style || {};
+            style.colors = style.colors || ['#428EDA', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FCCD57'];
+            style.fontSize = style.fontSize || '12px';
+            style.fontColor = style.fontColor || '#fff';
+            style.legend = style.legend || {};
+            style.legend.enabled = style.legend.enabled !== false;
+            style.legend.bgColor = 'none';
+            style.legend.po = style.legend.po || 'bottom';
+            style.legend.align = 'center';
+            style.legend.layout = 'horizontal';
+            style.legend.itemMargin = 0;
+            style.legend.floating = false;
+            style.legend.inPo = style.legend.inPo || 'middle';
+            style.legend.inBorderColor = style.legend.inBorderColor || '#999';
+            style.legend.borderWidth = 0;
+            style.legend.x = 0;
+            style.legend.y = 0;
+            style.legend.shadow = false;
 
+            if(style.legend.po == 'bottom') {
+                style.legend.verticalAlign = 'bottom';
+            }
+            if(style.legend.po == 'top') {
+                style.legend.verticalAlign = 'top';
+            }
+            if(style.legend.po == 'left') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'left';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.po == 'right') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'right';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.in) {
+                style.legend.color = style.legend.color || '#333';
+                style.legend.floating = true;
+                style.legend.verticalAlign = style.legend.inPo;
+                style.legend.inBgColor = style.legend.inBgColor || '#fff';
+                style.legend.bgColor = style.legend.inBgColor;
+                style.legend.inBorderWidth = style.legend.inBorderWidth || 1;
+                style.legend.borderWidth = style.legend.inBorderWidth;
+                if(style.legend.po == 'right') style.legend.x = -10;
+                if(style.legend.verticalAlign == 'top') style.legend.y = 10;
+                style.legend.shadow = true;
+            }else {
+                style.legend.color = style.legend.color || '#fff';
+            }
+            // if(datas.length && style.legend.po == 'left' || style.legend.po == 'right') {
+            //     let outerH = $('#' + v).height();
+            //     style.legend.itemMargin = parseInt((outerH / datas.length - 20) / 2);
+            // }
+            let areaspline = Highcharts.chart(v,{
+                chart: {
+                    backgroundColor: 'none'
+                },
+                title: {
+                    text: ''
+                },
+                legend: {
+                    enabled: style.legend.enabled,
+                    align: style.legend.align,
+                    verticalAlign: style.legend.verticalAlign,
+                    layout: style.legend.layout,
+                    squareSymbol: false,
+                    symbolHeight: 8,
+                    symbolWidth: 20,
+                    symbolPadding: 8,
+                    itemMarginTop: style.legend.itemMargin,
+                    itemMarginBottom: style.legend.itemMargin,
+                    navigation: {
+                        enabled: false
+                    },
+                    itemStyle: {
+                        color: style.legend.color,
+                        fontWeight: 'normal',
+                        opacity: 0.9
+                    },
+                    itemHoverStyle: {
+                        color: style.legend.color,
+                    },
+                    itemHiddenStyle: {
+                        color: style.legend.color,
+                        opacity: 0.5
+                    },
+                    floating: style.legend.floating,
+                    backgroundColor: style.legend.bgColor,
+                    x: style.legend.x,
+                    y: style.legend.y,
+                    borderColor: style.legend.inBorderColor,
+                    borderWidth: style.legend.borderWidth,
+                    borderRadius: 2,
+                    shadow: style.legend.shadow
+                },
+                xAxis: {
+                    categories: xLabels,
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                },
+                yAxis: {
+                    title: {
+                        text: ''
+                    },
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    gridLineColor: 'rgba(255, 255, 255, 0.3)'
+                },
+                tooltip: {
+                    shared: true
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    areaspline: {
+                        fillOpacity: 0.5
+                    }
+                },
+                colors: style.colors,
+                series: datas
+            });
+            $('#'+ v +' .highcharts-credits').remove();
+            if(style.legend.in) {
+                if(style.legend.po == 'left'){
+                    let outerPL =  parseInt($('#'+ v +' .highcharts-plot-background').attr('x'));
+                    areaspline.legend.update({
+                        x: outerPL
+                    });
+                }
+                if(style.legend.verticalAlign == 'bottom'){
+                    let outerPB =  parseInt($('#'+ v +' .highcharts-plot-background').attr('height')) - parseInt($('#'+ v +' .highcharts-legend-box').attr('height')) - 10;
+                    areaspline.legend.update({
+                        verticalAlign: 'top',
+                        y: outerPB
+                    });
+                }
+            }
+        },
+        /**
+         * 面积曲线图
+         * @params v: 绑定元素id , 必须
+         * @params datas: 数据列表,例: [{name: '名称', data: [1, 2, 3, ...]}, ...] , 必须
+         * @params xLabels: x轴文字显示列表,例: ['文字1', '文字2', '文字3', ...] , 必须
+         * @params style: 样式控制
+         * @params style.colors: 面积背景颜色 , 例: ['#428EDA', '#87D568', ...] , 可选
+         * @params style.fontSize: x,y轴标签文字大小
+         * @params style.fontColor: x,y轴标签文字颜色
+         * @params style.legend: 图例控制
+         * @params style.legend.enabled: 图例开关,默认true,可选false
+         * @params style.legend.color: 字颜色
+         * @params style.legend.po: 图例位置,默认bottom,可选top, right, bottom, left
+         * @params style.legend.in: 图例是否在图表内部显示,默认false,可选true
+         * @params style.legend.inPo: 图例在图标内部显示位置,默认middle, 可选top, middle, bottom
+         * @params style.legend.inBgColor: 图例在图标内部显示背景颜色,默认#fff
+         * @params style.legend.inBorderWidth: 图例在图标内部显示边框宽度,默认1
+         * @params style.legend.inBorderColor: 图例在图标内部显示边框颜色,默认#999
+         * */
+        areaSpline: function(v, datas, xLabels, style){
+            datas = datas || [];
+            xLabels = xLabels || [];
+            style = style || {};
+            style.colors = style.colors || ['#428EDA', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FCCD57'];
+            style.fontSize = style.fontSize || '12px';
+            style.fontColor = style.fontColor || '#fff';
+            style.legend = style.legend || {};
+            style.legend.enabled = style.legend.enabled !== false;
+            style.legend.bgColor = 'none';
+            style.legend.po = style.legend.po || 'bottom';
+            style.legend.align = 'center';
+            style.legend.layout = 'horizontal';
+            style.legend.itemMargin = 0;
+            style.legend.floating = false;
+            style.legend.inPo = style.legend.inPo || 'middle';
+            style.legend.inBorderColor = style.legend.inBorderColor || '#999';
+            style.legend.borderWidth = 0;
+            style.legend.x = 0;
+            style.legend.y = 0;
+            style.legend.shadow = false;
+
+            if(style.legend.po == 'bottom') {
+                style.legend.verticalAlign = 'bottom';
+            }
+            if(style.legend.po == 'top') {
+                style.legend.verticalAlign = 'top';
+            }
+            if(style.legend.po == 'left') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'left';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.po == 'right') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'right';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.in) {
+                style.legend.color = style.legend.color || '#333';
+                style.legend.floating = true;
+                style.legend.verticalAlign = style.legend.inPo;
+                style.legend.inBgColor = style.legend.inBgColor || '#fff';
+                style.legend.bgColor = style.legend.inBgColor;
+                style.legend.inBorderWidth = style.legend.inBorderWidth || 1;
+                style.legend.borderWidth = style.legend.inBorderWidth;
+                if(style.legend.po == 'right') style.legend.x = -10;
+                if(style.legend.verticalAlign == 'top') style.legend.y = 10;
+                style.legend.shadow = true;
+            }else {
+                style.legend.color = style.legend.color || '#fff';
+            }
+            // if(datas.length && style.legend.po == 'left' || style.legend.po == 'right') {
+            //     let outerH = $('#' + v).height();
+            //     style.legend.itemMargin = parseInt((outerH / datas.length - 20) / 2);
+            // }
+            let areaspline = Highcharts.chart(v,{
+                chart: {
+                    type: 'areaspline',
+                    backgroundColor: 'none'
+                },
+                title: {
+                    text: ''
+                },
+                legend: {
+                    enabled: style.legend.enabled,
+                    align: style.legend.align,
+                    verticalAlign: style.legend.verticalAlign,
+                    layout: style.legend.layout,
+                    squareSymbol: false,
+                    symbolHeight: 8,
+                    symbolWidth: 20,
+                    symbolPadding: 8,
+                    itemMarginTop: style.legend.itemMargin,
+                    itemMarginBottom: style.legend.itemMargin,
+                    navigation: {
+                        enabled: false
+                    },
+                    itemStyle: {
+                        color: style.legend.color,
+                        fontWeight: 'normal',
+                        opacity: 0.9
+                    },
+                    itemHoverStyle: {
+                        color: style.legend.color,
+                    },
+                    itemHiddenStyle: {
+                        color: style.legend.color,
+                        opacity: 0.5
+                    },
+                    floating: style.legend.floating,
+                    backgroundColor: style.legend.bgColor,
+                    x: style.legend.x,
+                    y: style.legend.y,
+                    borderColor: style.legend.inBorderColor,
+                    borderWidth: style.legend.borderWidth,
+                    borderRadius: 2,
+                    shadow: style.legend.shadow
+                },
+                xAxis: {
+                    categories: xLabels,
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                },
+                yAxis: {
+                    title: {
+                        text: ''
+                    },
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    gridLineColor: 'rgba(255, 255, 255, 0.3)'
+                },
+                tooltip: {
+                    shared: true
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    areaspline: {
+                        fillOpacity: 0.5
+                    }
+                },
+                colors: style.colors,
+                series: datas
+            });
+            $('#'+ v +' .highcharts-credits').remove();
+            if(style.legend.in) {
+                if(style.legend.po == 'left'){
+                    let outerPL =  parseInt($('#'+ v +' .highcharts-plot-background').attr('x'));
+                    areaspline.legend.update({
+                        x: outerPL
+                    });
+                }
+                if(style.legend.verticalAlign == 'bottom'){
+                    let outerPB =  parseInt($('#'+ v +' .highcharts-plot-background').attr('height')) - parseInt($('#'+ v +' .highcharts-legend-box').attr('height')) - 10;
+                    areaspline.legend.update({
+                        verticalAlign: 'top',
+                        y: outerPB
+                    });
+                }
+            }
+        },
+        /**
+         * 圆环进度条
+         * @params v: 绑定元素id , 必须
+         * @params value: 圆环的百分比值, 范围0-100 , 必须
+         * @params style: 圆环样式控制 , 可选
+         * @params style.size: 圆环大小,圆环直径,默认容器宽、高小的值
+         * @params style.width: 圆环加载条宽度, 范围0-1, 默认0.2
+         * @params style.fontColor: 圆环字体颜色
+         * @params style.speed: 圆环加载速度,毫秒, 默认 1000
+         * @params style.color: 圆环进度条颜色, 默认 #118BD4, ( 提供了6 种系统颜色, 值: '_0' 到 '_5' )
+         * @params style.bgColor: 圆环背景颜色, 默认 #013567
+         * @params style.text: 圆环内部是否显示比例文字, 默认true
+         * @params style.fontColor: 圆环内部文字颜色, 默认 #fff
+         * */
+        ringSpeed: function(v, value, style){
+            value = value || 0;
+            style = style || {};
+            style.colors = ['#128CD7', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FBCE57'];
+            style.size = style.size || 0;
+            let outerW = $("#" + v).width();
+            let outerH = $("#" + v).height();
+            let defaultSize = outerW;
+            if(outerH < outerW) defaultSize = outerH;
+            if(!style.size || style.size > defaultSize) style.size = defaultSize;
+            style.speed = style.speed || 1000;
+            style.color = style.color || '#118BD4';
+            let colorNew = style.color.split('_');
+            if(colorNew.length > 1 && style.colors.length > colorNew[1]) style.color = style.colors[colorNew[1]];
+            style.bgColor = style.bgColor || '#013567';
+            style.text = style.text || true;
+            style.fontColor = style.fontColor || '#fff';
+            style.fontSize = style.fontSize || '12px';
+            style.width = style.width || 0.2;
+            $("#" + v).css('color', style.fontColor);
+            $("#" + v).circleChart({
+                value: value,
+                size: style.size,
+                speed: style.speed,
+                color: style.color,
+                fontSize: style.fontSize,
+                backgroundColor: style.bgColor,
+                text: true,
+                widthRatio: style.width,
+                onDraw: function(el, circle) {
+                    circle.text(Math.round(circle.value) + '%');
+                }
+            });
+        },
+        /**
+         * 饼形图 highcharts
+         * @params v: 绑定元素id , 必须
+         * @params datas: 数据列表,例: [{name: '个体访',y: 75}, ...] , 必须
+         * @params style: 样式控制 , 可选
+         * @params style.title: title文字
+         * @params style.titleSize: title文字大小
+         * @params style.titleColor: title文字颜色
+         * @params style.titleEvent: 默认无,可选hover
+         * @params style.pieColors: 扇形区域颜色,例: ['#128CD7', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FBCE57'] , 可选
+         * @params style.innerSize: 中间圆环百分比,默认0
+         * @params style.legend: 图例控制
+         * @params style.legend.enabled: 图例开关,默认true,可选false
+         * @params style.legend.color: 字颜色
+         * @params style.legend.po: 图例位置,默认bottom,可选top, right, bottom, left
+         * @params style.legend.ifLabelNum: 是否显示图例数值,默认false,可选true
+         * @params style.legend.labelSplit: 显示图例数值分隔符,默认中文分号'：'
+         * */
+        pie: function(v, datas, style){
+            datas = datas || [];
+            style = style || {};
+            style.title = style.title || '';
+            style.titleSize = style.titleSize || '18px';
+            style.titleColor = style.titleColor || '#fff';
+            style.titleEvent = style.titleEvent || false;
+            style.pieColors = style.pieColors || ['#128CD7', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FBCE57'];
+            style.innerSize = style.innerSize || 0;
+            style.legend = style.legend || {};
+            style.legend.enabled = style.legend.enabled !== false;
+            style.legend.color = style.legend.color || '#fff';
+            style.legend.po = style.legend.po || 'bottom';
+            style.legend.align = 'center';
+            style.legend.layout = 'horizontal';
+            style.legend.itemMargin = 0;
+            if(style.legend.po == 'bottom') {
+                style.legend.verticalAlign = 'bottom';
+            }
+            if(style.legend.po == 'top') {
+                style.legend.verticalAlign = 'top';
+            }
+            if(style.legend.po == 'left') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'left';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.po == 'right') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'right';
+                style.legend.layout = 'vertical';
+            }
+            if(datas.length && style.legend.po == 'left' || style.legend.po == 'right') {
+                let outerH = $('#' + v).height();
+                style.legend.itemMargin = parseInt((outerH / datas.length - 20) / 2);
+            }
+            style.legend.labelFormat = '{name}';
+            style.legend.labelSplit = style.legend.labelSplit || '：';
+            if(style.legend.ifLabelNum) style.legend.labelFormat += style.legend.labelSplit + '{y}';
+            var chartPie = Highcharts.chart(v, {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie',
+                    backgroundColor: 'none',
+                    spacing: [0, 0, 0, 0]
+                },
+                title: {
+                    floating:true,
+                    text: style.title,
+                    style: {
+                        color: style.titleColor,
+                        fontSize: style.titleSize
+                    }
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        borderWidth: 0,
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true,
+                        point: {
+                            events: {
+                                mouseOver: function(e) {
+                                    if(style.titleEvent == 'hover'){
+                                        chartPie.setTitle({
+                                            text: e.target.name+ '<br>'+ e.target.y + ' %'
+                                        });
+                                    }
+                                },
+                                mouseOut: function(e) {
+                                    if(style.titleEvent == 'hover'){
+                                        chartPie.setTitle({
+                                            text: style.title
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                    }
+                },
+                legend: {
+                    enabled: style.legend.enabled,
+                    align: style.legend.align,
+                    verticalAlign: style.legend.verticalAlign,
+                    layout: style.legend.layout,
+                    squareSymbol: false,
+                    symbolHeight: 8,
+                    symbolWidth: 20,
+                    symbolPadding: 8,
+                    labelFormat: style.legend.labelFormat,
+                    itemMarginTop: style.legend.itemMargin,
+                    itemMarginBottom: style.legend.itemMargin,
+                    navigation: {
+                        enabled: false
+                    },
+                    itemStyle: {
+                        color: style.legend.color,
+                        fontWeight: 'normal',
+                        opacity: 0.9
+                    },
+                    itemHoverStyle: {
+                        color: style.legend.color,
+                    },
+                    itemHiddenStyle: {
+                        color: style.legend.color,
+                        opacity: 0.5
+                    }
+                },
+                colors: style.pieColors,
+                series: [{
+                    name: '',
+                    colorByPoint: true,
+                    innerSize: style.innerSize,
+                    data: datas
+                }]
+            }, function(c) {
+                // 环形图圆心
+                var centerY = c.series[0].center[1];
+                var titleHeight = parseInt(c.title.styles.fontSize);
+                c.setTitle({
+                    y: centerY + titleHeight / 2
+                });
+            });
+            $('#'+ v +' .highcharts-credits').remove();
+        },
+        /**
+         * 竖向柱形图
+         * @params v: 绑定元素 , 必须
+         * @params datas: 数据列表,例: [{name: '柱名称', data: [1, 2, 3, ...]}, ...] , 必须
+         * @params xLabel: x轴文字 , 必须 , 例; ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+         * @params style: 样式控制 , 可选
+         * @params style.maxNum: 设置比例最大值
+         * @params style.unit: 设置单位
+         * @params style.fontColor: 字颜色
+         * @params style.fontSize: 字大小
+         * @params style.zhuColor: 设置柱颜色,渐变颜色英文标点逗号隔开 ,例:['#5497E3,#1281D1', '#7CD05C,#569A3B', '#FBC94C,#9F823A', '#FC888D,#E36067']
+         * */
+        zhuCol: function(v, datas, xLabel, style){
+            if(v && v.indexOf('#') == -1 && v.indexOf('.') == -1) v = '#' + v;
+            datas = datas || [];
+            xLabel = xLabel || [];
+            style = style || {};
+            style.unit = style.unit || '';
+            style.fontColor = style.fontColor || '#fff';
+            style.fontSize = style.fontSize || '12px';
+            style.zhuColor = style.zhuColor || ['#5497E3,#1281D1', '#7CD05C,#569A3B', '#FBC94C,#9F823A', '#FC888D,#E36067'];
+            let maxNum = style.maxNum || 0;
+            $(v).empty();
+            if(datas.length) {
+                let str = '';
+                let fontStyle = '';
+                fontStyle += 'color: '+ style.fontColor +';';
+                fontStyle += 'font-size: '+ style.fontSize +';';
+                str += '<div class="charts-zhu-col" style="'+ fontStyle +'">';
+                for(let i in datas) {
+                    if(datas[i].data && datas[i].data.length) {
+                        for(let j in datas[i].data) {
+                            if(datas[i].data[j] > maxNum) maxNum = datas[i].data[j];
+                        }
+                    }
+                }
+
+                let leftStr = '';
+                leftStr += '<div class="c-left">';
+                let leftLen = 5;
+                let leftAveNum = parseInt(maxNum / leftLen);
+                let maxNumNew = maxNum;
+                for(let i = 0 ; i < 5 ; i ++) {
+                    leftStr += '<i class="text-more">'+ maxNumNew +'</i>';
+                    maxNumNew -= leftAveNum;
+                }
+                leftStr += '<i class="text-more">0</i>';
+                leftStr += '</div>';
+                str += leftStr;
+
+                let rightStr = '';
+                rightStr += '<div class="c-right">';
+                rightStr += '   <div class="c-items">';
+                let rightLen = xLabel.length || 0;
+                for(let i in datas) {
+                    if(datas[i].data && datas[i].data.length > rightLen) rightLen = datas[i].data.length;
+                }
+                for(let i = 0 ; i < rightLen ; i ++) {
+                    rightStr += '<div class="c-item">';
+                    for(let j in datas){
+                        let zhuStyle = '';
+                        let zhuColor = style.zhuColor[j].split(',');
+                        if(zhuColor.length > 1){
+                            zhuStyle += 'background: linear-gradient(to top, '+ zhuColor[0] +', '+ zhuColor[1] +');';
+                        }else{
+                            zhuStyle += 'background: '+ zhuColor[0] +';';
+                        }
+                        if(datas[j].data && datas[j].data[i]) rightStr += '<i class="c-col-'+ j +'" col="c-col-'+ j +'" clabel="'+ datas[j].name +'" cnum="'+ datas[j].data[i] +'" style="'+ zhuStyle +'" value="'+ datas[j].data[i] +'"></i>';
+                    }
+                    rightStr += '</div>';
+                }
+                rightStr += '   </div>';
+                rightStr += '   <div class="c-bg"><i></i><i></i><i></i><i></i><i></i></div>';
+                rightStr += '   <div class="c-tip">';
+                rightStr += '       <div class="c-tip-til"></div>';
+                rightStr += '       <div class="c-tip-con"></div>';
+                rightStr += '   </div>';
+                rightStr += '</div>';
+                str += rightStr;
+
+                if(xLabel.length) {
+                    let bottomStr = '';
+                    bottomStr += '<div class="c-bottom">';
+                    for(let i in xLabel) {
+                        bottomStr += '<span class="text-more">'+ xLabel[i] +'</span>';
+                    }
+                    bottomStr += '</div>';
+                    str += bottomStr;
+                }
+
+                str += '</div>';
+                $(v).html(str);
+
+                let outerW = $(v +' .charts-zhu-col').width();
+                if(xLabel.length){
+                    let bootomLen = xLabel.length;
+                    let bootomAveW = parseInt(outerW / bootomLen);
+                    $(v +' .charts-zhu-col .c-bottom span').each(function(){
+                        $(this).css('width', bootomAveW);
+                    });
+                }
+                if(rightLen > 0) {
+                    let rightAveW = parseInt(outerW / rightLen);
+                    $(v +' .charts-zhu-col .c-right .c-item').each(function(){
+                        $(this).css('width', rightAveW);
+                        let iLen = $(this).children('i').length;
+                        if(iLen) {
+                            let iW = $(this).children('i').width();
+                            let firstLeft = (0 - iLen / 2) * iW;
+                            let marginW = 4;
+                            let marginAll = (iLen - 1) * marginW;
+                            firstLeft -= marginAll / 2;
+                            for(let i = 0 ; i < iLen ; i ++) {
+                                $(this).children('i').eq(i).css('margin-left', firstLeft);
+                                firstLeft += iW + marginW;
+                            }
+                        }
+                    });
+                    setTimeout(function(){
+                        $(v +' .charts-zhu-col .c-right .c-item i').each(function() {
+                            let height = parseInt($(this).attr('value')) / maxNum * 100;
+                            $(this).css('height', height + '%');
+                        });
+                    },100);
+                    let hideTime;
+                    $(v +' .charts-zhu-col .c-right .c-item').hover(function(e){
+                        let index = $(this).index();
+                        if(xLabel.length && xLabel[index]) $(v +' .charts-zhu-col .c-right .c-tip .c-tip-til').html(xLabel[index]);
+                        let str = '';
+                        $(this).children('i').each(function(i){
+                            str += '<div class="c-tip-text-row"><b style="background: '+ style.zhuColor[i].split(',')[0] +';"></b>'+ $(this).attr("clabel") +'：'+ $(this).attr("cnum") + style.unit +'</div>';
+                        });
+                        $(v +' .charts-zhu-col .c-right .c-tip .c-tip-con').html(str);
+                        $(v +' .charts-zhu-col .c-right .c-tip').addClass('on').addClass('show');
+                        clearTimeout(hideTime);
+                        let parentOpTop = $(this).parent().offset().top;
+                        let firstOpTop = $(this).children('i').first().offset().top;
+                        let lastOpTop = $(this).children('i').last().offset().top;
+                        let tipH = $(v +' .charts-zhu-col .c-right .c-tip').outerHeight();
+                        let opTop = firstOpTop - parentOpTop - tipH / 2;
+
+                        let parentOpLeft = $(this).parent().offset().left;
+                        let firstOpLeft = $(this).children('i').first().offset().left;
+                        let lastOpLeft = $(this).children('i').last().offset().left;
+                        let lastW = $(this).children('i').last().width();
+                        let tipW = $(v +' .charts-zhu-col .c-right .c-tip').outerWidth();
+                        let opLeft = firstOpLeft - parentOpLeft - tipW;
+                        if(opLeft < 0) {
+                            opLeft = lastOpLeft - parentOpLeft + lastW;
+                            opTop = lastOpTop - parentOpTop - tipH / 2;
+                        }
+                        $(v +' .charts-zhu-col .c-right .c-tip').css({
+                            left: opLeft,
+                            top: opTop,
+                            'border-color': style.zhuColor[0].split(',')[0],
+                            transition: 'left 0.2s ease-out,top 0.2s ease-out'
+                        });
+                    },function(){
+                        $(v +' .charts-zhu-col .c-right .c-tip').removeClass('on');
+                        hideTime = setTimeout(function(){
+                            if(!$(v +' .charts-zhu-col .c-right .c-tip').hasClass('on')) {
+                                $(v +' .charts-zhu-col .c-right .c-tip').removeClass('show');
+                                $(v +' .charts-zhu-col .c-right .c-tip .c-tip-til').empty();
+                                $(v +' .charts-zhu-col .c-right .c-tip .c-tip-con').empty();
+                            }
+                        }, 400);
+                    });
+                }
+            }
+        },
+        /**
+         * 横向比例柱形图
+         * @params v: 绑定元素 , 必须
+         * @params datas: 数据列表 ,例: [{label: '样例一', num: '数量1'}, {label: '样例二', num: '数量2'}, ...], 必须
+         * @params style: 样式控制 , 可选
+         * @params style.maxNum: 设置比例最大值
+         * @params style.unit: 设置单位
+         * @params style.fontPo: 文字位置,默认normal,可选:top, normal
+         * @params style.fontColor: 字颜色,若前后文字区分颜色英文逗号隔开
+         * @params style.fontSize: 字大小,若前后文字区分大小英文逗号隔开
+         * @params style.bgColor: 设置背景颜色,渐变颜色英文标点逗号隔开
+         * @params style.fontSpecial: 设置文字特效, 可选
+         * @params style.fontSpecial.split: 分隔成对符号,例:'()',若只有单符号会自动生成两个相同的符号, 必须
+         * @params style.fontSpecial.ifSplit: 是否显示分隔符, 默认false,可选true
+         * @params style.fontSpecial.color: 文字颜色
+         * @params style.fontSpecial.ifSplitColor: 分隔符是否跟随文字颜色, 默认false,可选true
+         * @params style.fontSpecial.size: 文字大小
+         * @params style.fontSpecial.ifSplitSize: 文分隔符是否跟随文字大小, 默认false,可选true
+         * @params style.borderColor: 设置边框颜色
+         * @params style.zhuColor: 设置柱颜色,渐变颜色英文标点逗号隔开
+         * */
+        zhuRow: function(v, datas, style){
+            if(v && v.indexOf('#') == -1 && v.indexOf('.') == -1) v = '#' + v;
+            datas = datas || [];
+            style = style || {};
+            style.unit = style.unit || '';
+            style.fontPo = style.fontPo || 'normal';
+            style.fontColor = style.fontColor || '#fff';
+            style.fontSize = style.fontSize || '12px';
+            style.bgColor = style.bgColor || '#013567';
+            style.borderColor = style.borderColor || '#01479C';
+            style.zhuColor = style.zhuColor || 'linear-gradient(to right, #024164 , #118CD2)';
+            style.fontSpecial = style.fontSpecial || {};
+            style.fontSpecial.color = style.fontSpecial.color || 'inherit';
+            style.fontSpecial.size = style.fontSpecial.size || 'inherit';
+            $(v).empty();
+            if(datas.length){
+                let maxNum = style.maxNum || 0;
+                let str = '';
+                str += '<div class="charts-zhu-row">';
+                str += '	<table>';
+                for(let i in datas) {
+                    let label = datas[i].label || '';
+                    let num = datas[i].num || 0;
+                    if(style.fontSpecial.split){
+                        let split = [style.fontSpecial.split.substr(0, 1), style.fontSpecial.split.substr(-1)];
+                        let labelNew = label;
+                        if(labelNew.indexOf(split[0]) != -1) labelNew = labelNew.split(split[0])[1];
+                        if(labelNew.indexOf(split[1]) != -1)labelNew = labelNew.split(split[1])[0];
+                        let splitStr = '';
+                        if(style.fontSpecial.ifSplit) {
+                            let splitStrStyle = '';
+                            if(style.fontSpecial.ifSplitColor) splitStrStyle += 'color: '+ style.fontSpecial.color +';';
+                            if(style.fontSpecial.ifSplitSize) splitStrStyle += 'font-size: '+ style.fontSpecial.size +';';
+                            splitStr = '<font style="'+ splitStrStyle +'">'+ split[0] +'</font>&<font style="'+ splitStrStyle +'">'+ split[1] +'</font>'
+                        }
+                        let labelReplaceBefore = split[0] + labelNew + split[1];
+                        let labelReplaceAfter = '';
+                        labelReplaceAfter += splitStr.split('&')[0] || '';
+                        labelReplaceAfter += '<font style="color: '+ style.fontSpecial.color +';font-size: '+ style.fontSpecial.size +';">'+ labelNew +'</font>'
+                        labelReplaceAfter += splitStr.split('&')[1] || '';
+                        label = label.replace(labelReplaceBefore, labelReplaceAfter);
+                    }
+
+                    if(num > maxNum) maxNum = num;
+                    let zhuBgStyle = '';
+                    let zhuStyle = '';
+                    let fontStyle = ''
+                    let bgColor = style.bgColor.split(',');
+                    if(bgColor.length > 1){
+                        zhuBgStyle += 'background: linear-gradient(to right, '+ bgColor[0] +', '+ bgColor[1] +');';
+                    }else{
+                        zhuBgStyle += 'background: '+ bgColor[0] +';';
+                    }
+                    zhuBgStyle += 'border-color: '+ style.borderColor +';';
+                    let zhuColor = style.zhuColor.split(',');
+                    if(zhuColor.length > 1){
+                        zhuStyle += 'background: linear-gradient(to right, '+ zhuColor[0] +', '+ zhuColor[1] +');';
+                    }else{
+                        zhuStyle += 'background: '+ zhuColor[0] +';';
+                    }
+                    let fontColor = style.fontColor.split(',');
+                    let fontSize = style.fontSize.split(',');
+                    if(style.fontPo == 'top') {
+                        str += '	<tr style="'+ fontStyle +'">';
+                        str += '		<td>';
+                        str += '		    <div class="c-zhu-row-top">';
+                        str += '		        <span class="text-more" style="color: '+ fontColor[0] +';font-size: '+ fontSize[0] +';">'+ label +'</span>';
+                        str += '		        <span class="text-more" style="color: '+ (fontColor[1] || fontColor[0]) +';;font-size: '+ (fontSize[1] || fontSize[0]) +';">'+ num + style.unit +'</span>';
+                        str += '		    </div>';
+                        str += '		    <b class="c-zhu-row" style="'+ zhuBgStyle +'"><i value="'+ num +'" style="'+ zhuStyle +'"></i></b>';
+                        str += '		</td>';
+                        str += '	</tr>';
+                    }else {
+                        str += '	<tr style="'+ fontStyle +'">';
+                        str += '		<td><span class="text-more" style="color: '+ fontColor[0] +';font-size: '+ fontSize[0] +';">'+ label +'</span></td>';
+                        str += '		<td><b class="c-zhu-row" style="'+ zhuBgStyle +'"><i value="'+ num +'" style="'+ zhuStyle +'"></i></b></td>';
+                        str += '		<td><span class="text-more" style="color: '+ (fontColor[1] || fontColor[0]) +';;font-size: '+ (fontSize[1] || fontSize[0]) +';">'+ num + style.unit +'</span></td>';
+                        str += '	</tr>';
+                    }
+                }
+                str += '	</table>';
+                str += '</div>';
+                $(v).html(str);
+                let outerH = $(v).height();
+                var zhuH = $(v + ' td').height();
+                if(outerH / datas.length > zhuH) $(v + ' td').css('height', parseInt(outerH / datas.length));
+                if(maxNum > 0) {
+                    setTimeout(function(){
+                        $(v + ' .c-zhu-row i').each(function() {
+                            let width = parseInt($(this).attr('value')) / maxNum * 100;
+                            $(this).css('width', width + '%');
+                        });
+                    },100);
+                }
+            }
+        },
+        /**
+         * 柱形图 highcharts
+         * @params v: 绑定元素id , 必须
+         * @params datas: 数据列表,例: [{name: '柱名称', data: [1, 2, 3, ...]}, ...] , 必须
+         * @params xLabels: x轴文字显示列表,例: ['文字1', '文字2', '文字3', ...] , 必须
+         * @params style: 样式控制
+         * @params style.fontColor: x,y轴标签文字颜色
+         * @params style.fontSize: x,y轴标签文字大小
+         * @params style.colors: 柱颜色 , 例: ['#428EDA', '#87D568', ...] , 可选
+         * @params style.legend: 图例控制
+         * @params style.legend.enabled: 图例开关,默认true,可选false
+         * @params style.legend.color: 字颜色
+         * @params style.legend.po: 图例位置,默认bottom,可选top, right, bottom, left
+         * @params style.legend.in: 图例是否在图表内部显示,默认false,可选true
+         * @params style.legend.inPo: 图例在图标内部显示位置,默认middle, 可选top, middle, bottom
+         * @params style.legend.inBgColor: 图例在图标内部显示背景颜色,默认#fff
+         * @params style.legend.inBorderWidth: 图例在图标内部显示边框宽度,默认1
+         * @params style.legend.inBorderColor: 图例在图标内部显示边框颜色,默认#999
+         * */
+        zhu: function(v, datas, xLabels, style){
+            datas = datas || [];
+            xLabels = xLabels || [];
+            style = style || {};
+            style.colors = style.colors || ['#428EDA', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FCCD57'];
+            style.fontColor = style.fontColor || '#fff';
+            style.fontSize = style.fontSize || '12px';
+            style.legend = style.legend || {};
+            style.legend.enabled = style.legend.enabled !== false;
+            style.legend.bgColor = 'none';
+            style.legend.po = style.legend.po || 'bottom';
+            style.legend.align = 'center';
+            style.legend.layout = 'horizontal';
+            style.legend.itemMargin = 0;
+            style.legend.floating = false;
+            style.legend.inPo = style.legend.inPo || 'middle';
+            style.legend.inBorderColor = style.legend.inBorderColor || '#999';
+            style.legend.borderWidth = 0;
+            style.legend.x = 0;
+            style.legend.y = 0;
+            style.legend.shadow = false;
+
+            if(style.legend.po == 'bottom') {
+                style.legend.verticalAlign = 'bottom';
+            }
+            if(style.legend.po == 'top') {
+                style.legend.verticalAlign = 'top';
+            }
+            if(style.legend.po == 'left') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'left';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.po == 'right') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'right';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.in) {
+                style.legend.color = style.legend.color || '#333';
+                style.legend.floating = true;
+                style.legend.verticalAlign = style.legend.inPo;
+                style.legend.inBgColor = style.legend.inBgColor || '#fff';
+                style.legend.bgColor = style.legend.inBgColor;
+                style.legend.inBorderWidth = style.legend.inBorderWidth || 1;
+                style.legend.borderWidth = style.legend.inBorderWidth;
+                if(style.legend.po == 'right') style.legend.x = -10;
+                if(style.legend.verticalAlign == 'top') style.legend.y = 10;
+                style.legend.shadow = true;
+            }else {
+                style.legend.color = style.legend.color || '#fff';
+            }
+            // if(datas.length && style.legend.po == 'left' || style.legend.po == 'right') {
+            //     let outerH = $('#' + v).height();
+            //     style.legend.itemMargin = parseInt((outerH / datas.length - 20) / 2);
+            // }
+            let zhu = Highcharts.chart(v,{
+                chart: {
+                    type: 'column',
+                    backgroundColor: 'none'
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: ''
+                },
+                tooltip: {
+                    shared: true
+                },
+                xAxis: {
+                    categories: xLabels,
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: ''
+                    },
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    gridLineColor: 'rgba(255, 255, 255, 0.3)'
+                },
+                plotOptions: {
+                    column: {
+                        borderWidth: 0,
+                    }
+                },
+                legend: {
+                    enabled: style.legend.enabled,
+                    align: style.legend.align,
+                    verticalAlign: style.legend.verticalAlign,
+                    layout: style.legend.layout,
+                    squareSymbol: false,
+                    symbolHeight: 8,
+                    symbolWidth: 20,
+                    symbolPadding: 8,
+                    itemMarginTop: style.legend.itemMargin,
+                    itemMarginBottom: style.legend.itemMargin,
+                    navigation: {
+                        enabled: false
+                    },
+                    itemStyle: {
+                        color: style.legend.color,
+                        fontWeight: 'normal',
+                        opacity: 0.9
+                    },
+                    itemHoverStyle: {
+                        color: style.legend.color,
+                    },
+                    itemHiddenStyle: {
+                        color: style.legend.color,
+                        opacity: 0.5
+                    },
+                    floating: style.legend.floating,
+                    backgroundColor: style.legend.bgColor,
+                    x: style.legend.x,
+                    y: style.legend.y,
+                    borderColor: style.legend.inBorderColor,
+                    borderWidth: style.legend.borderWidth,
+                    borderRadius: 2,
+                    shadow: style.legend.shadow
+                },
+                series: datas,
+                colors: style.colors
+            });
+            $('#'+ v +' .highcharts-credits').remove();
+            if(style.legend.in) {
+                if(style.legend.po == 'left'){
+                    let outerPL =  parseInt($('#'+ v +' .highcharts-plot-background').attr('x'));
+                    zhu.legend.update({
+                        x: outerPL
+                    });
+                }
+                if(style.legend.verticalAlign == 'bottom'){
+                    let outerPB =  parseInt($('#'+ v +' .highcharts-plot-background').attr('height')) - parseInt($('#'+ v +' .highcharts-legend-box').attr('height')) - 10;
+                    zhu.legend.update({
+                        verticalAlign: 'top',
+                        y: outerPB
+                    });
+                }
+            }
+        },
+        /**
+         * 锥形图 highcharts
+         * @params v: 绑定元素id , 必须
+         * @params datas: 数据列表,例: [{name: '柱名称', data: [1, 2, 3, ...]}, ...] , 必须
+         * @params xLabels: x轴文字显示列表,例: ['文字1', '文字2', '文字3', ...] , 必须
+         * @params style: 样式控制
+         * @params style.fontColor: x,y轴标签文字颜色
+         * @params style.fontSize: x,y轴标签文字大小
+         * @params style.colors: 柱颜色 , 例: ['#428EDA', '#87D568', ...] , 可选
+         * @params style.legend: 图例控制
+         * @params style.legend.enabled: 图例开关,默认true,可选false
+         * @params style.legend.color: 字颜色
+         * @params style.legend.po: 图例位置,默认bottom,可选top, right, bottom, left
+         * @params style.legend.in: 图例是否在图表内部显示,默认false,可选true
+         * @params style.legend.inPo: 图例在图标内部显示位置,默认middle, 可选top, middle, bottom
+         * @params style.legend.inBgColor: 图例在图标内部显示背景颜色,默认#fff
+         * @params style.legend.inBorderWidth: 图例在图标内部显示边框宽度,默认1
+         * @params style.legend.inBorderColor: 图例在图标内部显示边框颜色,默认#999
+         * */
+        zhui: function(v, datas, xLabels, style){
+            datas = datas || [];
+            xLabels = xLabels || [];
+            style = style || {};
+            style.colors = style.colors || ['#428EDA', '#87D568', '#FF696B', '#7F77E6', '#D8A7DE', '#FCCD57'];
+            style.fontColor = style.fontColor || '#fff';
+            style.fontSize = style.fontSize || '12px';
+            style.legend = style.legend || {};
+            style.legend.enabled = style.legend.enabled !== false;
+            style.legend.bgColor = 'none';
+            style.legend.po = style.legend.po || 'bottom';
+            style.legend.align = 'center';
+            style.legend.layout = 'horizontal';
+            style.legend.itemMargin = 0;
+            style.legend.floating = false;
+            style.legend.inPo = style.legend.inPo || 'middle';
+            style.legend.inBorderColor = style.legend.inBorderColor || '#999';
+            style.legend.borderWidth = 0;
+            style.legend.x = 0;
+            style.legend.y = 0;
+            style.legend.shadow = false;
+
+            if(style.legend.po == 'bottom') {
+                style.legend.verticalAlign = 'bottom';
+            }
+            if(style.legend.po == 'top') {
+                style.legend.verticalAlign = 'top';
+            }
+            if(style.legend.po == 'left') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'left';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.po == 'right') {
+                style.legend.verticalAlign = 'middle';
+                style.legend.align = 'right';
+                style.legend.layout = 'vertical';
+            }
+            if(style.legend.in) {
+                style.legend.color = style.legend.color || '#333';
+                style.legend.floating = true;
+                style.legend.verticalAlign = style.legend.inPo;
+                style.legend.inBgColor = style.legend.inBgColor || '#fff';
+                style.legend.bgColor = style.legend.inBgColor;
+                style.legend.inBorderWidth = style.legend.inBorderWidth || 1;
+                style.legend.borderWidth = style.legend.inBorderWidth;
+                if(style.legend.po == 'right') style.legend.x = -10;
+                if(style.legend.verticalAlign == 'top') style.legend.y = 10;
+                style.legend.shadow = true;
+            }else {
+                style.legend.color = style.legend.color || '#fff';
+            }
+            // if(datas.length && style.legend.po == 'left' || style.legend.po == 'right') {
+            //     let outerH = $('#' + v).height();
+            //     style.legend.itemMargin = parseInt((outerH / datas.length - 20) / 2);
+            // }
+            let zhu = Highcharts.chart(v,{
+                chart: {
+                    type: 'columnpyramid',
+                    backgroundColor: 'none'
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: ''
+                },
+                tooltip: {
+                    shared: true
+                },
+                xAxis: {
+                    categories: xLabels,
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: ''
+                    },
+                    labels: {
+                        style: {
+                            color: style.fontColor,
+                            fontSize: style.fontSize
+                        }
+                    },
+                    gridLineColor: 'rgba(255, 255, 255, 0.3)'
+                },
+                plotOptions: {
+                    column: {
+                        borderWidth: 0,
+                    }
+                },
+                legend: {
+                    enabled: style.legend.enabled,
+                    align: style.legend.align,
+                    verticalAlign: style.legend.verticalAlign,
+                    layout: style.legend.layout,
+                    squareSymbol: false,
+                    symbolHeight: 8,
+                    symbolWidth: 20,
+                    symbolPadding: 8,
+                    itemMarginTop: style.legend.itemMargin,
+                    itemMarginBottom: style.legend.itemMargin,
+                    navigation: {
+                        enabled: false
+                    },
+                    itemStyle: {
+                        color: style.legend.color,
+                        fontWeight: 'normal',
+                        opacity: 0.9
+                    },
+                    itemHoverStyle: {
+                        color: style.legend.color,
+                    },
+                    itemHiddenStyle: {
+                        color: style.legend.color,
+                        opacity: 0.5
+                    },
+                    floating: style.legend.floating,
+                    backgroundColor: style.legend.bgColor,
+                    x: style.legend.x,
+                    y: style.legend.y,
+                    borderColor: style.legend.inBorderColor,
+                    borderWidth: style.legend.borderWidth,
+                    borderRadius: 2,
+                    shadow: style.legend.shadow
+                },
+                series: datas,
+                colors: style.colors
+            });
+            $('#'+ v +' .highcharts-credits').remove();
+            if(style.legend.in) {
+                if(style.legend.po == 'left'){
+                    let outerPL =  parseInt($('#'+ v +' .highcharts-plot-background').attr('x'));
+                    zhu.legend.update({
+                        x: outerPL
+                    });
+                }
+                if(style.legend.verticalAlign == 'bottom'){
+                    let outerPB =  parseInt($('#'+ v +' .highcharts-plot-background').attr('height')) - parseInt($('#'+ v +' .highcharts-legend-box').attr('height')) - 10;
+                    zhu.legend.update({
+                        verticalAlign: 'top',
+                        y: outerPB
+                    });
+                }
+            }
+        }
     };
     /** 地图 */
     xc.maps = {
@@ -483,6 +1655,13 @@
             if(style.text) map += '    <img class="xc-map-after" src="'+ text +'">';
             map += '</div>';
             return map;
+        },
+        /**
+         * @action tianditu 绘制天地图
+         * @param v: 绑定元素id, 必须
+         */
+        tianditu: function(v){
+
         }
     };
     window.$xc = xc.tools;
