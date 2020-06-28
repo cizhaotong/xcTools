@@ -74,7 +74,7 @@
             }
             $('.xc-alert .xc-con').html(text);
             $('.xc-alert').show();
-            var bodyH = $(window).height() * 0.92;
+            var bodyH = $(window)[0].innerHeight * 0.92;
             var thisH = $('.xc-alert-con').height();
             var marginT = (bodyH - thisH) / 2;
             $('.xc-alert-con').css('margin-top' , marginT + 'px');
@@ -107,7 +107,7 @@
             }
             $('.xc-confirm .xc-con').html(text);
             $('.xc-confirm').show();
-            var bodyH = $(window).height() * 0.92;
+            var bodyH = $(window)[0].innerHeight * 0.92;
             var thisH = $('.xc-confirm-con').height();
             var marginT = (bodyH - thisH) / 2;
             $('.xc-confirm-con').css('margin-top' , marginT + 'px');
@@ -314,7 +314,7 @@
          */
         fitBigScreen: function(v, screen){
             var _this = this;
-            var windowHeight = $(window).height();
+            var windowHeight = $(window)[0].innerHeight;
             $('body').css('min-height', windowHeight);
             _this.countBigScreen(v, screen);
             $(window).resize(function(){
@@ -327,8 +327,8 @@
         },
         countBigScreen: function (v, screen) {
             if(v && screen){
-                var windowWidth = $(window).width();
-                var windowHeight = $(window).height();
+                var windowWidth = $(window)[0].innerWidth;
+                var windowHeight = $(window)[0].innerHeight;
                 $('#' + v).css({
                     display: 'block',
                     overflow: 'hidden',
