@@ -315,12 +315,18 @@
         fitBigScreen: function(v, screen){
             var _this = this;
             var windowHeight = $(window)[0].innerHeight;
+			var windowWidth = $(window)[0].innerWidth;
             $('body').css('min-height', windowHeight);
             _this.countBigScreen(v, screen);
             $(window).resize(function(){
                 if(windowHeight < $(this).height()) {
                     windowHeight = $(this).height();
                     $('body').css('min-height', windowHeight);
+                    _this.countBigScreen(v, screen);
+                }
+				if(windowWidth < $(this).width()) {
+                    windowWidth = $(this).width();
+                    $('body').css('min-width', windowWidth);
                     _this.countBigScreen(v, screen);
                 }
             });
