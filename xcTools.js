@@ -1,14 +1,14 @@
 (function(window){
     "use strict";
     var xc = {};
-    xc.absPath = document.scripts[document.scripts.length - 1].src.substring(0, document.scripts[document.scripts.length - 1].src.lastIndexOf('/') + 1);
-    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ xc.absPath +'xcTools.css" />');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'jQuery/jquery.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/highcharts.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/highcharts-more.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'highchats/circleChart.min.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'tianditu/tianditu.js"></script>');
-    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'tianditu/heatmapOverlay.js"></script>');
+    xc.absPath = document.scripts[document.scripts.length - 1].src.substring(0, document.scripts[document.scripts.length - 1].src.lastIndexOf('/'));
+    document.writeln('<link type="text/css" rel="stylesheet" media="all" href="'+ xc.absPath +'/xcTools.css" />');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/jQuery/jquery.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/highchats/highcharts.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/highchats/highcharts-more.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/highchats/circleChart.min.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/tianditu/tianditu.js"></script>');
+    document.writeln('<script type="text/javascript" src="'+ xc.absPath +'/tianditu/heatmapOverlay.js"></script>');
 
     /** 工具库 */
     xc.tools = {
